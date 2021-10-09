@@ -9624,134 +9624,209 @@ nk_draw_vertex_layout_element_is_end_of_layout(
     return (element->attribute == NK_VERTEX_ATTRIBUTE_COUNT ||
             element->format == NK_FORMAT_COUNT);
 }
+NK_INTERN void nk_process_schar(void *attribute, const float *values, int value_count) {
+    int value_index;
+    for(value_index = 0; value_index < value_count; ++value_index) {
+        char value = (char)NK_CLAMP((float)NK_SCHAR_MIN, values[value_index], (float)NK_SCHAR_MAX);
+        NK_MEMCPY(attribute, &value, sizeof(value));
+        attribute = (void*)((char*)attribute + sizeof(char));
+    }
+}
+NK_INTERN void nk_process_sshort(void *attribute, const float *values, int value_count) {
+    int value_index;
+    for(value_index = 0; value_index < value_count; ++value_index) {
+        nk_short value = (nk_short)NK_CLAMP((float)NK_SSHORT_MIN, values[value_index], (float)NK_SSHORT_MAX);
+        NK_MEMCPY(attribute, &value, sizeof(value));
+        attribute = (void*)((char*)attribute + sizeof(value));
+    }
+}
+NK_INTERN void nk_process_sint(void *attribute, const float *values, int value_count) {
+    int value_index;
+    for(value_index = 0; value_index < value_count; ++value_index) {
+        nk_int value = (nk_int)NK_CLAMP((float)NK_SINT_MIN, values[value_index], (float)NK_SINT_MAX);
+        NK_MEMCPY(attribute, &value, sizeof(value));
+        attribute = (void*)((char*)attribute + sizeof(nk_int));
+    }
+}
+NK_INTERN void nk_process_uchar(void *attribute, const float *values, int value_count) {
+    int value_index;
+    for(value_index = 0; value_index < value_count; ++value_index) {
+        unsigned char value = (unsigned char)NK_CLAMP((float)NK_UCHAR_MIN, values[value_index], (float)NK_UCHAR_MAX);
+        NK_MEMCPY(attribute, &value, sizeof(value));
+        attribute = (void*)((char*)attribute + sizeof(unsigned char));
+    }
+}
+NK_INTERN void nk_process_ushort(void *attribute, const float *values, int value_count) {
+    int value_index;
+    for(value_index = 0; value_index < value_count; ++value_index) {
+        nk_ushort value = (nk_ushort)NK_CLAMP((float)NK_USHORT_MIN, values[value_index], (float)NK_USHORT_MAX);
+        NK_MEMCPY(attribute, &value, sizeof(value));
+        attribute = (void*)((char*)attribute + sizeof(value));
+    }
+}
+NK_INTERN void nk_process_uint(void *attribute, const float *values, int value_count) {
+    int value_index;
+    for(value_index = 0; value_index < value_count; ++value_index) {
+        nk_uint value = (nk_uint)NK_CLAMP((float)NK_UINT_MIN, values[value_index], (float)NK_UINT_MAX);
+        NK_MEMCPY(attribute, &value, sizeof(value));
+        attribute = (void*)((char*)attribute + sizeof(nk_uint));
+    }
+}
+NK_INTERN void nk_process_float(void *attribute, const float *values, int value_count) {
+    NK_MEMCPY(attribute, values, sizeof(float)*value_count);
+}
+NK_INTERN void nk_process_double(void *attribute, const float *values, int value_count) {
+    int value_index;
+    for(value_index = 0; value_index < value_count; ++value_index) {
+        double value = (double)values[value_index];
+        NK_MEMCPY(attribute, &value, sizeof(value));
+        attribute = (void*)((char*)attribute + sizeof(double));
+    }
+}
+NK_INTERN void nk_process_r8g8b8(void *attribute, const float *values, int value_count) {
+    struct nk_color col = nk_rgba_fv(values);
+    NK_MEMCPY(attribute, &col.r, sizeof(col));
+}
+NK_INTERN void nk_process_r16g15b16(void *attribute, const float *values, int value_count) {
+    nk_ushort col[3];
+    col[0] = (nk_ushort)(values[0] * (float)NK_USHORT_MAX);
+    col[1] = (nk_ushort)(values[1] * (float)NK_USHORT_MAX);
+    col[2] = (nk_ushort)(values[2] * (float)NK_USHORT_MAX);
+    NK_MEMCPY(attribute, col, sizeof(col));
+}
+NK_INTERN void nk_process_r32g32b32(void *attribute, const float *values, int value_count) {
+    nk_uint col[3];
+    col[0] = (nk_uint)(values[0] * (float)NK_UINT_MAX);
+    col[1] = (nk_uint)(values[1] * (float)NK_UINT_MAX);
+    col[2] = (nk_uint)(values[2] * (float)NK_UINT_MAX);
+    NK_MEMCPY(attribute, col, sizeof(col));
+}
+NK_INTERN void nk_process_r8g8b8a8(void *attribute, const float *values, int value_count) {
+    struct nk_color col = nk_rgba_fv(values);
+    NK_MEMCPY(attribute, &col.r, sizeof(col));
+}
+NK_INTERN void nk_process_b8g8r8a8(void *attribute, const float *values, int value_count) {
+    struct nk_color col = nk_rgba_fv(values);
+    struct nk_color bgra = nk_rgba(col.b, col.g, col.r, col.a);
+    NK_MEMCPY(attribute, &bgra, sizeof(bgra));
+}
+NK_INTERN void nk_process_r16g15b16a16(void *attribute, const float *values, int value_count) {
+    nk_ushort col[4];
+    col[0] = (nk_ushort)(values[0] * (float)NK_USHORT_MAX);
+    col[1] = (nk_ushort)(values[1] * (float)NK_USHORT_MAX);
+    col[2] = (nk_ushort)(values[2] * (float)NK_USHORT_MAX);
+    col[3] = (nk_ushort)(values[3] * (float)NK_USHORT_MAX);
+    NK_MEMCPY(attribute, col, sizeof(col));
+}
+NK_INTERN void nk_process_r32g32b32a32(void *attribute, const float *values, int value_count) {
+    nk_uint col[4];
+    col[0] = (nk_uint)(values[0] * (float)NK_UINT_MAX);
+    col[1] = (nk_uint)(values[1] * (float)NK_UINT_MAX);
+    col[2] = (nk_uint)(values[2] * (float)NK_UINT_MAX);
+    col[3] = (nk_uint)(values[3] * (float)NK_UINT_MAX);
+    NK_MEMCPY(attribute, col, sizeof(col));
+}
+NK_INTERN void nk_process_r32g32b32a32_float(void *attribute, const float *values, int value_count) {
+    NK_MEMCPY(attribute, values, sizeof(float) * 4);
+}
+NK_INTERN void nk_process_r32g32b32a32_double(void *attribute, const float *values, int value_count) {
+    double col[4];
+    col[0] = (double)values[0];
+    col[1] = (double)values[1];
+    col[2] = (double)values[2];
+    col[3] = (double)values[3];
+    NK_MEMCPY(attribute, col, sizeof(col));
+}
+NK_INTERN void nk_process_rgb32(void *attribute, const float *values, int value_count) {
+    struct nk_color col = nk_rgba_fv(values);
+    nk_uint color = nk_color_u32(col);
+    NK_MEMCPY(attribute, &color, sizeof(color));
+}
+NK_INTERN void nk_process_rgba32(void *attribute, const float *values, int value_count) {
+    struct nk_color col = nk_rgba_fv(values);
+    nk_uint color = nk_color_u32(col);
+    NK_MEMCPY(attribute, &color, sizeof(color));
+}
+NK_INTERN void nk_process_invalid_color_format(void *attribute, const float *values, int value_count) {
+    NK_ASSERT(0 && "invalid format");
+}
+NK_INTERN void nk_process_invalid_vertex_format(void *attribute, const float *values, int value_count) {
+    NK_ASSERT(0 && "invalid format");
+}
+void(*nk_draw_vertex_color_jtable[])(void*, const float*, int) = {
+    nk_process_invalid_color_format,
+    nk_process_invalid_color_format,
+    nk_process_invalid_color_format,
+    nk_process_invalid_color_format,
+    nk_process_invalid_color_format,
+    nk_process_invalid_color_format,
+    nk_process_invalid_color_format,
+    nk_process_invalid_color_format,
+    nk_process_r8g8b8,
+    nk_process_r16g15b16,
+    nk_process_r32g32b32,
+    nk_process_r8g8b8a8,
+    nk_process_b8g8r8a8,
+    nk_process_r16g15b16a16,
+    nk_process_r32g32b32a32,
+    nk_process_r32g32b32a32_float,
+    nk_process_r32g32b32a32_double,
+    nk_process_rgb32,
+    nk_process_rgba32,
+    nk_process_invalid_color_format //tailing jump table invalid call
+};
+void(*nk_draw_vertex_element_jtable[])(void*, const float*, int) = {
+    nk_process_schar,
+    nk_process_sshort,
+    nk_process_sint,
+    nk_process_uchar,
+    nk_process_ushort,
+    nk_process_uint,
+    nk_process_float,
+    nk_process_double,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format,
+    nk_process_invalid_vertex_format //tailing jump table invalid call
+};
 NK_INTERN void
 nk_draw_vertex_color(void *attr, const float *vals,
     enum nk_draw_vertex_layout_format format)
 {
     /* if this triggers you tried to provide a value format for a color */
     float val[4];
+    void(*nk_callback)(void*, const float*, int);
+
     NK_ASSERT(format >= NK_FORMAT_COLOR_BEGIN);
     NK_ASSERT(format <= NK_FORMAT_COLOR_END);
-    if (format < NK_FORMAT_COLOR_BEGIN || format > NK_FORMAT_COLOR_END) return;
+    //if (format < NK_FORMAT_COLOR_BEGIN || format > NK_FORMAT_COLOR_END) return;
 
     val[0] = NK_SATURATE(vals[0]);
     val[1] = NK_SATURATE(vals[1]);
     val[2] = NK_SATURATE(vals[2]);
     val[3] = NK_SATURATE(vals[3]);
-
-    switch (format) {
-    default: NK_ASSERT(0 && "Invalid vertex layout color format"); break;
-    case NK_FORMAT_R8G8B8A8:
-    case NK_FORMAT_R8G8B8: {
-        struct nk_color col = nk_rgba_fv(val);
-        NK_MEMCPY(attr, &col.r, sizeof(col));
-    } break;
-    case NK_FORMAT_B8G8R8A8: {
-        struct nk_color col = nk_rgba_fv(val);
-        struct nk_color bgra = nk_rgba(col.b, col.g, col.r, col.a);
-        NK_MEMCPY(attr, &bgra, sizeof(bgra));
-    } break;
-    case NK_FORMAT_R16G15B16: {
-        nk_ushort col[3];
-        col[0] = (nk_ushort)(val[0]*(float)NK_USHORT_MAX);
-        col[1] = (nk_ushort)(val[1]*(float)NK_USHORT_MAX);
-        col[2] = (nk_ushort)(val[2]*(float)NK_USHORT_MAX);
-        NK_MEMCPY(attr, col, sizeof(col));
-    } break;
-    case NK_FORMAT_R16G15B16A16: {
-        nk_ushort col[4];
-        col[0] = (nk_ushort)(val[0]*(float)NK_USHORT_MAX);
-        col[1] = (nk_ushort)(val[1]*(float)NK_USHORT_MAX);
-        col[2] = (nk_ushort)(val[2]*(float)NK_USHORT_MAX);
-        col[3] = (nk_ushort)(val[3]*(float)NK_USHORT_MAX);
-        NK_MEMCPY(attr, col, sizeof(col));
-    } break;
-    case NK_FORMAT_R32G32B32: {
-        nk_uint col[3];
-        col[0] = (nk_uint)(val[0]*(float)NK_UINT_MAX);
-        col[1] = (nk_uint)(val[1]*(float)NK_UINT_MAX);
-        col[2] = (nk_uint)(val[2]*(float)NK_UINT_MAX);
-        NK_MEMCPY(attr, col, sizeof(col));
-    } break;
-    case NK_FORMAT_R32G32B32A32: {
-        nk_uint col[4];
-        col[0] = (nk_uint)(val[0]*(float)NK_UINT_MAX);
-        col[1] = (nk_uint)(val[1]*(float)NK_UINT_MAX);
-        col[2] = (nk_uint)(val[2]*(float)NK_UINT_MAX);
-        col[3] = (nk_uint)(val[3]*(float)NK_UINT_MAX);
-        NK_MEMCPY(attr, col, sizeof(col));
-    } break;
-    case NK_FORMAT_R32G32B32A32_FLOAT:
-        NK_MEMCPY(attr, val, sizeof(float)*4);
-        break;
-    case NK_FORMAT_R32G32B32A32_DOUBLE: {
-        double col[4];
-        col[0] = (double)val[0];
-        col[1] = (double)val[1];
-        col[2] = (double)val[2];
-        col[3] = (double)val[3];
-        NK_MEMCPY(attr, col, sizeof(col));
-    } break;
-    case NK_FORMAT_RGB32:
-    case NK_FORMAT_RGBA32: {
-        struct nk_color col = nk_rgba_fv(val);
-        nk_uint color = nk_color_u32(col);
-        NK_MEMCPY(attr, &color, sizeof(color));
-    } break; }
+    uint8_t jump_idx = NK_MIN((uint8_t)format, (uint8_t)NK_FORMAT_COUNT);
+    nk_callback = nk_draw_vertex_color_jtable[jump_idx];
+    nk_callback(attr, val, 1);
 }
 NK_INTERN void
 nk_draw_vertex_element(void *dst, const float *values, int value_count,
     enum nk_draw_vertex_layout_format format)
 {
     int value_index;
-    void *attribute = dst;
+    void(*nk_callback)(void*, const float*, int);
+    void* attribute = dst;
     /* if this triggers you tried to provide a color format for a value */
-    NK_ASSERT(format < NK_FORMAT_COLOR_BEGIN);
-    if (format >= NK_FORMAT_COLOR_BEGIN && format <= NK_FORMAT_COLOR_END) return;
-    for (value_index = 0; value_index < value_count; ++value_index) {
-        switch (format) {
-        default: NK_ASSERT(0 && "invalid vertex layout format"); break;
-        case NK_FORMAT_SCHAR: {
-            char value = (char)NK_CLAMP((float)NK_SCHAR_MIN, values[value_index], (float)NK_SCHAR_MAX);
-            NK_MEMCPY(attribute, &value, sizeof(value));
-            attribute = (void*)((char*)attribute + sizeof(char));
-        } break;
-        case NK_FORMAT_SSHORT: {
-            nk_short value = (nk_short)NK_CLAMP((float)NK_SSHORT_MIN, values[value_index], (float)NK_SSHORT_MAX);
-            NK_MEMCPY(attribute, &value, sizeof(value));
-            attribute = (void*)((char*)attribute + sizeof(value));
-        } break;
-        case NK_FORMAT_SINT: {
-            nk_int value = (nk_int)NK_CLAMP((float)NK_SINT_MIN, values[value_index], (float)NK_SINT_MAX);
-            NK_MEMCPY(attribute, &value, sizeof(value));
-            attribute = (void*)((char*)attribute + sizeof(nk_int));
-        } break;
-        case NK_FORMAT_UCHAR: {
-            unsigned char value = (unsigned char)NK_CLAMP((float)NK_UCHAR_MIN, values[value_index], (float)NK_UCHAR_MAX);
-            NK_MEMCPY(attribute, &value, sizeof(value));
-            attribute = (void*)((char*)attribute + sizeof(unsigned char));
-        } break;
-        case NK_FORMAT_USHORT: {
-            nk_ushort value = (nk_ushort)NK_CLAMP((float)NK_USHORT_MIN, values[value_index], (float)NK_USHORT_MAX);
-            NK_MEMCPY(attribute, &value, sizeof(value));
-            attribute = (void*)((char*)attribute + sizeof(value));
-            } break;
-        case NK_FORMAT_UINT: {
-            nk_uint value = (nk_uint)NK_CLAMP((float)NK_UINT_MIN, values[value_index], (float)NK_UINT_MAX);
-            NK_MEMCPY(attribute, &value, sizeof(value));
-            attribute = (void*)((char*)attribute + sizeof(nk_uint));
-        } break;
-        case NK_FORMAT_FLOAT:
-            NK_MEMCPY(attribute, &values[value_index], sizeof(values[value_index]));
-            attribute = (void*)((char*)attribute + sizeof(float));
-            break;
-        case NK_FORMAT_DOUBLE: {
-            double value = (double)values[value_index];
-            NK_MEMCPY(attribute, &value, sizeof(value));
-            attribute = (void*)((char*)attribute + sizeof(double));
-            } break;
-        }
-    }
+    uint8_t jump_idx = NK_MIN((uint8_t)format, (uint8_t)NK_FORMAT_COUNT);
+    nk_callback = nk_draw_vertex_element_jtable[jump_idx];
+    nk_callback(dst,values,value_count);
 }
 NK_INTERN void*
 nk_draw_vertex(void *dst, const struct nk_convert_config *config,
