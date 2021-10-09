@@ -9828,21 +9828,35 @@ nk_draw_vertex_element(void *dst, const float *values, int value_count,
     nk_callback = nk_draw_vertex_element_jtable[jump_idx];
     nk_callback(dst,values,value_count);
 }
+NK_INTERN void nk_draw_invalid(void*, const float*, int, enum nk_draw_vertex_layout_format) {
+    NK_ASSERT(0 && "invalid format");
+}
+NK_INTERN void
+nk_process_draw_vertex_color(void* attr, const float* vals, int value_count,
+    enum nk_draw_vertex_layout_format format) {
+    nk_draw_vertex_color(attr, vals, format);
+}
+void(*nk_draw_vertex_jtable[])(void*, const float*, int, enum nk_draw_vertex_layout_format) = {
+    nk_draw_vertex_element,
+    nk_process_draw_vertex_color,
+    nk_draw_vertex_element,
+    nk_draw_invalid
+};
 NK_INTERN void*
-nk_draw_vertex(void *dst, const struct nk_convert_config *config,
+nk_draw_vertex(void* dst, const struct nk_convert_config* config,
     struct nk_vec2 pos, struct nk_vec2 uv, struct nk_colorf color)
 {
-    void *result = (void*)((char*)dst + config->vertex_size);
-    const struct nk_draw_vertex_layout_element *elem_iter = config->vertex_layout;
+    void* result = (void*)((char*)dst + config->vertex_size);
+    const struct nk_draw_vertex_layout_element* elem_iter = config->vertex_layout;
+    
+    int sizes[] = {2,1,2,0};
     while (!nk_draw_vertex_layout_element_is_end_of_layout(elem_iter)) {
-        void *address = (void*)((char*)dst + elem_iter->offset);
-        switch (elem_iter->attribute) {
-        case NK_VERTEX_ATTRIBUTE_COUNT:
-        default: NK_ASSERT(0 && "wrong element attribute"); break;
-        case NK_VERTEX_POSITION: nk_draw_vertex_element(address, &pos.x, 2, elem_iter->format); break;
-        case NK_VERTEX_TEXCOORD: nk_draw_vertex_element(address, &uv.x, 2, elem_iter->format); break;
-        case NK_VERTEX_COLOR: nk_draw_vertex_color(address, &color.r, elem_iter->format); break;
-        }
+        void* address = (void*)((char*)dst + elem_iter->offset);
+        //create a quick array of the potential points to pick
+        float *data[] = {&pos.x, &color.r, &uv.x, nullptr};
+
+        uint8_t jump_idx = NK_MIN((uint8_t)elem_iter->attribute, (uint8_t)NK_VERTEX_ATTRIBUTE_COUNT);
+        nk_draw_vertex_jtable[jump_idx](address, data[jump_idx], sizes[jump_idx], elem_iter->format);
         elem_iter++;
     }
     return result;
